@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+    <title>Touchpad Nativo Windows</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: white;
+            overflow: hidden;
+        }
+        #touchpad {
+            width: 90%;
+            height: 50vh;
+            background-color: #333;
+            border: 2px solid #555;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            user-select: none;
+        }
+        #click-btn {
+            width: 90%;
+            height: 15vh;
+            margin-top: 20px;
+            background-color: #0078d4;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            touch-action: none;
+        }
+        #click-btn:active {
+            background-color: #005a9e;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Touchpad Sem Programas</h2>
+    <div id="touchpad">Arraste o dedo aqui para mover</div>
+    <button id="click-btn">CLIQUE</button>
+
+    <script>
+        let lastX = 0;
+        let lastY = 0;
+
+        // O HTML descobre o IP do PC automaticamente baseado no link que abriu
+        const serverUrl = window.location.origin;
+
+        const touchpad = document.getElementById('touchpad');
+        const clickBtn = document.getElementById('click-btn');
+
+        // Detetar início do movimento
+        touchpad.addEventListener('touchstart', (e) => {
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+        });
+
+        // Enviar coordenadas de arrasto
+        touchpad.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+
+            const dx = Math.round(currentX - lastX);
+            const dy = Math.round(currentY - lastY);
+
+            if (dx !== 0 || dy !== 0) {
+                fetch(serverUrl, {
+                    method: 'POST',
+                    body: `action=move&x=${dx}&y=${dy}`,
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).catch(() => {});
+            }
+
+            lastX = currentX;
+            lastY = currentY;
+        });
+
+        // Enviar o clique ao pressionar o botão azul
+        clickBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            fetch(serverUrl, {
+                method: 'POST',
+                body: 'action=click',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).catch(() => {});
+        });
+    </script>
+</body>
+</html>
